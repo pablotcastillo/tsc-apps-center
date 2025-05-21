@@ -1,5 +1,4 @@
-
-    import React from 'react';
+import React from 'react';
     import { motion } from 'framer-motion';
     import { Mail, Phone, MapPin, Users } from 'lucide-react';
     import { Button } from '@/components/ui/button';
@@ -120,4 +119,3 @@
     };
 
     export default ContactPage;
-  

@@ -1,5 +1,4 @@
-
-    import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
     import * as TabsPrimitive from '@radix-ui/react-tabs';
     import React from 'react';
 
@@ -39,4 +38,3 @@
     TabsContent.displayName = TabsPrimitive.Content.displayName;
 
     export { Tabs, TabsList, TabsTrigger, TabsContent };
-  

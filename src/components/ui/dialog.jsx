@@ -1,5 +1,4 @@
-
-    import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
     import * as DialogPrimitive from '@radix-ui/react-dialog';
     import { X } from 'lucide-react';
     import React from 'react';
@@ -94,4 +93,3 @@
       DialogTitle,
       DialogTrigger,
     };
-  

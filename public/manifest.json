@@ -1,5 +1,4 @@
-
-    {
+{
       "name": "TSC Apps Center",
       "short_name": "TSC Apps",
       "description": "Información oficial sobre aplicaciones de TSC Innovation.",
@@ -20,4 +19,3 @@
       "display": "standalone",
       "start_url": "/"
     }
-  
