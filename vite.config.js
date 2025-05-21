@@ -182,7 +182,6 @@ logger.error = (msg, options) => {
 }
 
 export default defineConfig({
-	base: '/tsc-apps-center/',
 	customLogger: logger,
 	plugins: [react(), addTransformIndexHtml],
 	server: {
