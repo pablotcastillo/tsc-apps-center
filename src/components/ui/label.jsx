@@ -1,4 +1,5 @@
-import { cn } from '@/lib/utils';
+
+    import { cn } from '@/lib/utils';
     import * as LabelPrimitive from '@radix-ui/react-label';
     import { cva } from 'class-variance-authority';
     import React from 'react';
@@ -17,3 +18,4 @@ import { cn } from '@/lib/utils';
     Label.displayName = LabelPrimitive.Root.displayName;
 
     export { Label };
+  
