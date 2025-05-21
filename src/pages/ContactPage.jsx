@@ -26,7 +26,7 @@
 
     const ContactPage = () => {
       const teamMembers = [
-        { name: "Soporte General", email: "soporte@tscinnovation.com", role: "Consultas generales y tickets" },
+        { name: "Soporte General", email: "avasquev@tscinnovation.com", role: "Consultas generales y tickets" },
         { name: "Equipo de Desarrollo", email: "devteam@tscinnovation.com", role: "Consultas técnicas avanzadas" },
         { name: "Administración", email: "admin@tscinnovation.com", role: "Asuntos administrativos y de cuenta" },
       ];
@@ -55,16 +55,16 @@
             <ContactInfoCard 
               icon={<Phone size={40} />} 
               title="Teléfono de Soporte" 
-              content="+1 (555) 123-4567"
-              href="tel:+15551234567"
+              content="(51-1) 517 1800"
+              href="tel:+51015171800"
             />
             <ContactInfoCard 
               icon={<MapPin size={40} />} 
               title="Oficina Central" 
-              content="123 Calle Innovación, Ciudad Tecnológica, CP 01010"
+              content="Av. Antonio Miró Quesada 425, Piso 5, Magdalena del Mar, Lima - Perú."
+              href="https://maps.app.goo.gl/DNbkhjXD2rLsBStk7"
             />
           </div>
-
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -109,8 +109,12 @@
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Si tiene una consulta específica y prefiere que uno de nuestros especialistas se ponga en contacto, por favor utilice nuestro formulario de soporte.
             </p>
-            <a href="/support">
-              <Button size="lg" className="group">
+            <a href="https://forms.gle/m4tPHvFQvm5rfhHo6">
+              <Button 
+                size="lg" 
+                className="group"
+                onClick={() => window.open(googleFormUrl, '_blank')}
+              >
                 Ir al Formulario de Soporte
               </Button>
             </a>

@@ -31,8 +31,6 @@ import React from 'react';
           >
             <h2 className="text-3xl font-semibold text-primary mb-6 text-center">Reportar un Incidente</h2>
             
-            <GoogleFormProvider formUrl={googleFormUrl} />
-
             <div className="mt-8 text-center">
               <Button 
                 size="lg" 
@@ -43,7 +41,7 @@ import React from 'react';
               </Button>
             </div>
             <p className="text-sm text-muted-foreground mt-4 text-center">
-              Tu reporte será enviado automáticamente a nuestro equipo y será registrado en nuestra hoja de seguimiento para una pronta atención.
+              Tu reporte será enviado automáticamente a nuestro equipo y será registrado en nuestra hoja de seguimiento para una pronta atención. ¡Gracias!
             </p>
           </motion.section>
 

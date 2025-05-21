@@ -1,5 +1,5 @@
 
-    import React, { useState, useEffect } from 'react';
+    import React, { useState, useEffect, useMemo } from 'react';
     import { motion } from 'framer-motion';
     import { Link } from 'react-router-dom';
     import { Button } from '@/components/ui/button';
@@ -14,10 +14,12 @@
       DropdownMenuTrigger,
     } from "@/components/ui/dropdown-menu";
 
+    const sheetURL = "https://sheet.best/api/sheets/1gBdpoTiownumkWZ1vrlnVyefpcZHypBUivurAwQAFDY";
+
     const initialAppsData = [
-      { id: 'app1', name: 'Gestor de Proyectos TSC', version: '2.5.1', lastUpdate: '2025-05-15', category: 'Productividad', description: 'Herramienta integral para la gestión eficiente de proyectos y tareas del equipo.', icon: <Package size={48} className="text-blue-500" /> },
-      { id: 'app2', name: 'Analizador de Datos IA', version: '1.8.0', lastUpdate: '2025-05-10', category: 'Análisis', description: 'Plataforma avanzada para el análisis de grandes volúmenes de datos con IA.', icon: <Package size={48} className="text-green-500" /> },
-      { id: 'app3', name: 'CRM TSC Conecta', version: '3.2.5', lastUpdate: '2025-04-28', category: 'Ventas', description: 'Solución CRM para optimizar la relación con clientes y procesos de venta.', icon: <Package size={48} className="text-purple-500" /> },
+      { id: 'app1', name: 'TSC APP', version: '2.5.1', lastUpdate: '2025-05-15', category: 'Productividad', description: 'Aplicación para gestionar tareas técnicas y registrar datos en campo en tiempo real.', icon: <Package size={48} className="text-blue-500" /> },
+      { id: 'app2', name: 'TSC INTEGRAL WEB', version: '1.8.0', lastUpdate: '2025-05-10', category: 'Análisis', description: 'Plataforma central de TSC Innovation para acceder a controles, datos y herramientas clave de ingeniería.', icon: <Package size={48} className="text-green-500" /> },
+     // { id: 'app3', name: 'CRM TSC Conecta', version: '3.2.5', lastUpdate: '2025-04-28', category: 'Ventas', description: 'Solución CRM para optimizar la relación con clientes y procesos de venta.', icon: <Package size={48} className="text-purple-500" /> },
       { id: 'app4', name: 'EducaTech Plataforma', version: '1.2.3', lastUpdate: '2025-05-01', category: 'Educación', description: 'Entorno virtual de aprendizaje con herramientas interactivas y contenido multimedia.', icon: <Package size={48} className="text-orange-500" /> },
     ];
     
@@ -54,11 +56,21 @@
       const [selectedCategories, setSelectedCategories] = useState([]);
       
       useEffect(() => {
-        // Simulate fetching data
-        setApps(initialAppsData);
+        fetch("https://opensheet.elk.sh/1gBdpoTiownumkWZ1vrlnVyefpcZHypBUivurAwQAFDY/Aplicaciones")
+          .then((res) => res.json())
+          .then((data) => {
+            const mappedApps = data.map((row) => ({
+              id: row.id,
+              name: row.name,
+              version: row.version,
+              lastUpdate: row.lastUpdate,
+              category: row.category,
+              description: row.description,
+              icon: <Package size={48} className={`text-${row.iconColor}`} />,
+            }));
+            setApps(mappedApps);
+          });
       }, []);
-
-      const categories = [...new Set(initialAppsData.map(app => app.category))];
 
       const handleCategoryChange = (category) => {
         setSelectedCategories(prev => 
@@ -68,12 +80,25 @@
         );
       };
 
-      const filteredApps = apps.filter(app => {
-        const matchesSearchTerm = app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                  app.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(app.category);
-        return matchesSearchTerm && matchesCategory;
-      });
+      // 1) Extrae dinámicamente categorías de tu estado apps:
+      const categories = useMemo(
+        () => [...new Set(apps.map(a => a.category))],
+        [apps]
+      );
+      // 2) Filtra siempre sobre apps normalizados:
+      const filteredApps = useMemo(() => {
+        return apps.filter(app => {
+          const matchesSearch =
+            app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+          const matchesCategory =
+            selectedCategories.length === 0 ||
+            selectedCategories.includes(app.category);
+
+          return matchesSearch && matchesCategory;
+        });
+      }, [apps, searchTerm, selectedCategories]);
 
       return (
         <div className="space-y-8">
@@ -121,7 +146,7 @@
             </DropdownMenu>
           </div>
           
-          {filteredApps.length > 0 ? (
+          {filteredApps.length >= 0 ? (
             <motion.div 
               className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
               layout

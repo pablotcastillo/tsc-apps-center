@@ -6,14 +6,17 @@
     import { Package, ArrowLeft, Download, FileText, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 
     const mockAppDetails = {
+      //Aplicaciones
+      //Aplicacion 1: TSC APP
       app1: { 
-        name: 'Gestor de Proyectos TSC', 
-        version: '2.5.1', 
+        name: 'TSC APP', 
+        version: '1.0.0', 
         lastUpdate: '2025-05-15', 
         category: 'Productividad', 
         description: 'Herramienta integral para la gestión eficiente de proyectos y tareas del equipo. Permite la colaboración en tiempo real, seguimiento de progreso y asignación de recursos.',
         longDescription: 'El Gestor de Proyectos TSC es una solución robusta diseñada para optimizar flujos de trabajo y mejorar la productividad de equipos de cualquier tamaño. Ofrece un conjunto completo de herramientas que incluyen tableros Kanban, diagramas de Gantt, gestión de tiempos, y reportes personalizables. Su interfaz intuitiva y su capacidad de integración con otras herramientas populares lo convierten en un aliado indispensable para la ejecución exitosa de proyectos.',
         icon: <Package size={64} className="text-blue-500" />,
+        //Informacion sobre las actualizaciones
         releaseNotes: [
           { version: '2.5.1', date: '2025-05-15', changes: ['Corrección de error menor en exportación de reportes.', 'Mejora de rendimiento en la carga de tableros grandes.'] },
           { version: '2.5.0', date: '2025-05-01', changes: ['Nueva funcionalidad: Integración con calendarios externos.', 'Actualización de la interfaz de usuario para una mejor experiencia.'] },
@@ -26,16 +29,17 @@
           { id: 'ss3', alt: 'Diagrama de Gantt en Gestor de Proyectos TSC', description: 'Visualización de cronograma de proyecto con diagrama de Gantt.' },
         ]
       },
+      //Aplicacion 2: TSC INTEGRAL WEB
       app2: { 
-        name: 'Analizador de Datos IA', 
-        version: '1.8.0', 
+        name: 'TSC INTEGRAL WEB', 
+        version: '1.1.0', 
         lastUpdate: '2025-05-10', 
         category: 'Análisis', 
-        description: 'Plataforma avanzada para el análisis de grandes volúmenes de datos con Inteligencia Artificial. Descubra insights y patrones ocultos.',
-        longDescription: 'El Analizador de Datos IA de TSC Innovation potencia la toma de decisiones basada en datos. Utiliza algoritmos de machine learning para procesar, analizar y visualizar información compleja, permitiendo a los usuarios identificar tendencias, predecir resultados y optimizar estrategias. Compatible con diversas fuentes de datos y con capacidades de personalización para adaptarse a necesidades específicas de negocio.',
+        description: 'Plataforma avanzada para el análisis de grandes volúmenes de datos desde los Controles de Ingenieria.',
+        longDescription: 'TSC Integral Web es la plataforma integral de TSC Innovation para visualizar, gestionar y mantener actualizados todos los controles de ingeniería, aplicaciones internas y datos relevantes del ecosistema técnico. Aquí encontrarás herramientas, novedades, formularios y acceso centralizado a las principales soluciones desarrolladas por el equipo.',
         icon: <Package size={64} className="text-green-500" />,
         releaseNotes: [
-          { version: '1.8.0', date: '2025-05-10', changes: ['Optimización de algoritmos de predicción.', 'Soporte para nuevas fuentes de datos.'] },
+          { version: '1.8.0', date: '2025-05-10', changes: ['Optimización de los controles', 'Soporte para nuevas fuentes de datos.'] },
           { version: '1.7.5', date: '2025-04-20', changes: ['Mejoras en la interfaz de visualización de datos.', 'Correcciones de estabilidad.'] },
         ],
         documentationLink: '#',
@@ -45,7 +49,7 @@
           { id: 'ss5', alt: 'Gráficos generados por el Analizador de Datos IA', description: 'Ejemplo de visualizaciones y gráficos de datos.' },
         ]
       },
-       app3: { 
+       /*app3: { 
         name: 'CRM TSC Conecta', 
         version: '3.2.5', 
         lastUpdate: '2025-04-28', 
@@ -61,7 +65,7 @@
         screenshots: [
          { id: 'ss6', alt: 'Dashboard de CRM TSC Conecta', description: 'Vista general del dashboard del CRM.' },
         ]
-      },
+      },*/
       app4: { 
         name: 'EducaTech Plataforma', 
         version: '1.2.3', 

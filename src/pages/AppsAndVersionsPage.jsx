@@ -26,7 +26,7 @@ import React, { useState } from 'react';
     ];
 
     const trainingResources = [
-      { id: 'tr1', title: 'Guía de Inicio Rápido TSC APP Móvil', type: 'video', link: 'https://www.youtube.com/playlist?list=PL...', thumbnailDescription: 'Playlist de videos tutoriales para la app móvil.' },
+      { id: 'tr1', title: 'Guía de Inicio Rápido TSC APP', type: 'video', link: 'https://www.youtube.com/playlist?list=PL...', thumbnailDescription: 'Playlist de videos tutoriales para la app de TSC' },
       { id: 'tr2', title: 'Manual Avanzado TSC APP WEB', type: 'document', link: '#', thumbnailDescription: 'Documento PDF con el manual avanzado de la plataforma web.' },
       { id: 'tr3', title: 'Webinar: Optimizando Procesos con TSC', type: 'video', link: 'https://vimeo.com/...', thumbnailDescription: 'Grabación del último webinar sobre optimización de procesos.' },
       { id: 'tr4', title: 'FAQ y Resolución de Problemas', type: 'document', link: '#', thumbnailDescription: 'Documento con preguntas frecuentes y soluciones comunes.' },
