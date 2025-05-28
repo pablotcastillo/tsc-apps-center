@@ -10,6 +10,9 @@
 
     const LoginPage = ({ onLogin }) => {
       const navigate = useNavigate();
+      const [shouldRedirect, setShouldRedirect] = useState(false);
+      const [redirectPath, setRedirectPath] = useState('/');
+
       const { toast } = useToast();
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
@@ -26,27 +29,29 @@
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         if (email === 'admin@tsc.com' && password === 'password123') {
-          onLogin(); // This will set isAuthenticated and isAdmin in App.jsx
+          onLogin('admin');
           toast({
             title: 'Inicio de Sesión Exitoso',
             description: 'Bienvenido al panel de administración.',
           });
-          navigate('/admin');
-        } else if (email && password) { // Basic user login (no admin rights)
-           onLogin(); // This will set isAuthenticated in App.jsx, but not isAdmin
-           toast({
+          setRedirectPath('/admin');
+          setShouldRedirect(true);
+        } else if (email && password) {
+          onLogin('user');
+          toast({
             title: 'Inicio de Sesión Exitoso',
             description: 'Bienvenido a TSC Apps Center.',
           });
-          navigate('/'); // Redirect to home for regular users
-        }
-        else {
+          setRedirectPath('/');
+          setShouldRedirect(true);
+        } else {
           toast({
             title: 'Error de Autenticación',
             description: 'Correo electrónico o contraseña incorrectos.',
             variant: 'destructive',
           });
         }
+
         setIsLoading(false);
       };
       

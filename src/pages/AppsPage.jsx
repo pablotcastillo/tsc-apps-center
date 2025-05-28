@@ -1,173 +1,199 @@
+// src/pages/AppDetailsPage.jsx
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Package, ArrowLeft, Download, FileText, AlertTriangle } from 'lucide-react';
 
-    import React, { useState, useEffect, useMemo } from 'react';
-    import { motion } from 'framer-motion';
-    import { Link } from 'react-router-dom';
-    import { Button } from '@/components/ui/button';
-    import { Package, ArrowRight, Search, Filter } from 'lucide-react';
-    import { Input } from '@/components/ui/input';
-    import {
-      DropdownMenu,
-      DropdownMenuContent,
-      DropdownMenuCheckboxItem,
-      DropdownMenuLabel,
-      DropdownMenuSeparator,
-      DropdownMenuTrigger,
-    } from "@/components/ui/dropdown-menu";
+export default function AppDetailsPage() {
+  const { appId } = useParams();           // ↓ obtiene el ID de la ruta
+  const [app, setApp] = useState(null);    // ↓ solo la app encontrada
+  const [loading, setLoading] = useState(true);
 
-    const sheetURL = "https://sheet.best/api/sheets/1gBdpoTiownumkWZ1vrlnVyefpcZHypBUivurAwQAFDY";
+  // ↓ CAMBIO: fetch al JSON dinámico en lugar de usar datos mock
+  useEffect(() => {
+    // 1) Ver qué appId estamos recibiendo
+    console.log('🔍 Parámetro appId:', appId);
 
-    const initialAppsData = [
-      { id: 'app1', name: 'TSC APP', version: '2.5.1', lastUpdate: '2025-05-15', category: 'Productividad', description: 'Aplicación para gestionar tareas técnicas y registrar datos en campo en tiempo real.', icon: <Package size={48} className="text-blue-500" /> },
-      { id: 'app2', name: 'TSC INTEGRAL WEB', version: '1.8.0', lastUpdate: '2025-05-10', category: 'Análisis', description: 'Plataforma central de TSC Innovation para acceder a controles, datos y herramientas clave de ingeniería.', icon: <Package size={48} className="text-green-500" /> },
-     // { id: 'app3', name: 'CRM TSC Conecta', version: '3.2.5', lastUpdate: '2025-04-28', category: 'Ventas', description: 'Solución CRM para optimizar la relación con clientes y procesos de venta.', icon: <Package size={48} className="text-purple-500" /> },
-      { id: 'app4', name: 'EducaTech Plataforma', version: '1.2.3', lastUpdate: '2025-05-01', category: 'Educación', description: 'Entorno virtual de aprendizaje con herramientas interactivas y contenido multimedia.', icon: <Package size={48} className="text-orange-500" /> },
-    ];
-    
-    const AppCard = ({ app }) => (
-      <motion.div
-        className="bg-card p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        layout
-      >
-        <div className="flex items-center mb-4">
-          <div className="p-3 rounded-full bg-primary/10 mr-4">
-            {React.cloneElement(app.icon, { size: 32, className: 'text-primary' })}
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold text-primary">{app.name}</h3>
-            <p className="text-sm text-muted-foreground">Versión: {app.version}</p>
-          </div>
+    setLoading(true);
+    fetch('/catalogo_apps.json')
+      .then(res => {
+        if (!res.ok) throw new Error('Error cargando JSON');
+        return res.json();
+      })
+      .then(data => {
+        // 2) Ver todo el JSON recibido
+        console.log('🚀 JSON completo:', data);
+
+        // 3) Buscar la app
+        const found = data.find(a => a.id === appId);
+        console.log('🔍 app encontrada:', found);
+
+        setApp(found || null);
+      })
+      .catch(err => {
+        console.error('❌ Error en fetch o find:', err);
+        setApp(null);
+      })
+      .finally(() => setLoading(false));
+  }, [appId]);
+
+
+
+// Estado de no encontrada
+  if (!app) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center py-10">
+          <AlertTriangle size={64} className="mx-auto text-destructive mb-4" />
+          <h2 className="text-2xl font-semibold mb-2">Aplicación no encontrada</h2>
+          <p className="text-muted-foreground mb-6">
+            Lo sentimos, no pudimos encontrar los detalles para esta aplicación.
+          </p>
+          <Link to="/catalog">
+            <Button variant="outline">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Volver al catálogo
+            </Button>
+          </Link>
         </div>
-        <p className="text-muted-foreground text-sm mb-4 flex-grow">{app.description}</p>
-        <p className="text-xs text-muted-foreground/80 mb-4">Última actualización: {app.lastUpdate}</p>
-        <Link to={`/apps/${app.id}`}>
-          <Button variant="outline" className="w-full group mt-auto">
-            Ver Detalles <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+      </div>
+    );
+  }
+
+  // Renderizado final con datos de `app`
+  return (
+    <motion.div 
+      className="space-y-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="flex items-center justify-between">
+        <Link to="/catalog">
+          <Button variant="outline">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Volver al Catálogo
           </Button>
         </Link>
-      </motion.div>
-    );
+      </div>
 
-    const AppsPage = () => {
-      const [apps, setApps] = useState([]);
-      const [searchTerm, setSearchTerm] = useState('');
-      const [selectedCategories, setSelectedCategories] = useState([]);
-      
-      useEffect(() => {
-        fetch("https://opensheet.elk.sh/1gBdpoTiownumkWZ1vrlnVyefpcZHypBUivurAwQAFDY/Aplicaciones")
-          .then((res) => res.json())
-          .then((data) => {
-            const mappedApps = data.map((row) => ({
-              id: row.id,
-              name: row.name,
-              version: row.version,
-              lastUpdate: row.lastUpdate,
-              category: row.category,
-              description: row.description,
-              icon: <Package size={48} className={`text-${row.iconColor}`} />,
-            }));
-            setApps(mappedApps);
-          });
-      }, []);
-
-      const handleCategoryChange = (category) => {
-        setSelectedCategories(prev => 
-          prev.includes(category) 
-            ? prev.filter(c => c !== category)
-            : [...prev, category]
-        );
-      };
-
-      // 1) Extrae dinámicamente categorías de tu estado apps:
-      const categories = useMemo(
-        () => [...new Set(apps.map(a => a.category))],
-        [apps]
-      );
-      // 2) Filtra siempre sobre apps normalizados:
-      const filteredApps = useMemo(() => {
-        return apps.filter(app => {
-          const matchesSearch =
-            app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            app.description.toLowerCase().includes(searchTerm.toLowerCase());
-
-          const matchesCategory =
-            selectedCategories.length === 0 ||
-            selectedCategories.includes(app.category);
-
-          return matchesSearch && matchesCategory;
-        });
-      }, [apps, searchTerm, selectedCategories]);
-
-      return (
-        <div className="space-y-8">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-4xl font-bold text-center text-primary mb-2">Catálogo de Aplicaciones</h1>
-            <p className="text-lg text-muted-foreground text-center mb-8">
-              Descubra todas las soluciones innovadoras que TSC Innovation tiene para ofrecer.
-            </p>
-          </motion.div>
-
-          <div className="flex flex-col md:flex-row gap-4 mb-8 items-center">
-            <div className="relative flex-grow w-full md:w-auto">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input 
-                type="text"
-                placeholder="Buscar aplicaciones..."
-                className="pl-10 w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full md:w-auto">
-                  <Filter className="mr-2 h-4 w-4" /> Filtrar por Categoría
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Categorías</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {categories.map(category => (
-                  <DropdownMenuCheckboxItem
-                    key={category}
-                    checked={selectedCategories.includes(category)}
-                    onCheckedChange={() => handleCategoryChange(category)}
-                  >
-                    {category}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+      <header className="bg-card p-8 rounded-lg shadow-lg">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="p-4 bg-primary/10 rounded-lg">
+            {app.icon ? React.cloneElement(app.icon, { size: 64, className: 'text-primary' }) : <Package size={64} className="text-primary" />}
           </div>
-          
-          {filteredApps.length >= 0 ? (
-            <motion.div 
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-              layout
-            >
-              {filteredApps.map(app => (
-                <AppCard key={app.id} app={app} />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-10"
-            >
-              <Package size={64} className="mx-auto text-muted-foreground mb-4" />
-              <p className="text-xl text-muted-foreground">No se encontraron aplicaciones que coincidan con su búsqueda o filtro.</p>
-            </motion.div>
-          )}
+          <div>
+            <h1 className="text-4xl font-bold text-primary">{app.nombre || app.name}</h1>
+            <p className="text-lg text-muted-foreground">
+              Versión: {app.version} ({app.category || app.categoria})
+            </p>
+            <p className="text-sm text-muted-foreground/80">
+              Última actualización: {new Date(app.lastUpdate).toLocalDateString() || app.ultima_actualizacion}
+            </p>
+          </div>
+          <div className="md:ml-auto flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
+            {app.descarga && (
+              <Button 
+                size="lg" 
+                className="group" 
+                onClick={() => window.open(app.descarga || app.downloadLink, '_blank')}
+              >
+                <Download className="mr-2 h-5 w-5" /> Descargar
+              </Button>
+            )}
+            {app.documentacion && (
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="group" 
+                onClick={() => window.open(app.documentacion || app.docLink, '_blank')}
+              >
+                <FileText className="mr-2 h-5 w-5" /> Documentación
+              </Button>
+            )}
+          </div>
         </div>
-      );
-    };
+      </header>
 
-    export default AppsPage;
-  
+      <div className="grid lg:grid-cols-3 gap-8">
+        <motion.section 
+          className="lg:col-span-2 bg-card p-6 rounded-lg shadow-md"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <h2 className="text-2xl font-semibold text-primary mb-4">
+            Descripción Detallada
+          </h2>
+          <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+            {app.description_detail || app.description || app.descripcion}
+          </p>
+        </motion.section>
+
+        <motion.section 
+          className="bg-card p-6 rounded-lg shadow-md"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <h2 className="text-2xl font-semibold text-primary mb-4">
+            Notas de la Versión
+          </h2>
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            {(app.changelog_vers || app.notas_version)?.map((note, index) => (
+              <div 
+                key={index} 
+                className="border-l-4 border-primary pl-4 py-2 bg-primary/5 rounded-r-md"
+              >
+                <p className="font-semibold text-primary">
+                  Versión {note.changelog_text} 
+                  <span className="text-xs text-muted-foreground">
+                    ({note.date || note.changelog_vers})
+                  </span>
+                </p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground mt-1 space-y-0.5">
+                  {(note.changes || note.cambios).map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      </div>
+
+      {app.screenshots || app.imagen ? (
+        <motion.section 
+          className="bg-card p-6 rounded-lg shadow-md"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <h2 className="text-2xl font-semibold text-primary mb-6 text-center">
+            Capturas de Pantalla
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {(app.screenshots || app.imagenes).map((ss, idx) => (
+              <motion.div 
+                key={idx} 
+                className="rounded-lg overflow-hidden shadow-md border border-border"
+                whileHover={{ scale: 1.03 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+              >
+                <img  
+                  alt={ss.alt || ss.description || `Captura ${idx + 1}`}  
+                  className="w-full h-48 object-cover"  
+                  src={ss.url || ss.src || ss}  // ↓ CAMBIO: usa la propiedad correcta del JSON
+                />
+                { (ss.description || ss.alt) && (
+                  <p className="text-xs text-center p-2 bg-background text-muted-foreground">
+                    {ss.description || ss.alt}
+                  </p>
+                ) }
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+      ) : null}
+    </motion.div>
+  );
+}

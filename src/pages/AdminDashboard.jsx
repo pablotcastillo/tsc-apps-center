@@ -1,5 +1,11 @@
 
     import React, { useState, useEffect } from 'react';
+    import { useAuth } from "@/context/AuthContext";
+    
+    import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+    import { db } from "@/context/firebase"; // ajusta si el path cambia
+    import { fetchCatalog, fetchNews, fetchTickets, saveApp, saveNews, delApp, delNews } from '@/lib/api';
+
     import { motion } from 'framer-motion';
     import { Button } from '@/components/ui/button';
     import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,24 +28,13 @@
     import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
     // Mock data - in a real app, this would come from a backend/Supabase
-    const initialAppsData = [
-      { id: 'app1', name: 'Gestor de Proyectos TSC', version: '2.5.1', lastUpdate: '2025-05-15', category: 'Productividad', published: true, featured: true },
-      { id: 'app2', name: 'Analizador de Datos IA', version: '1.8.0', lastUpdate: '2025-05-10', category: 'Análisis', published: true, featured: false },
-      { id: 'app3', name: 'CRM TSC Conecta', version: '3.2.5', lastUpdate: '2025-04-28', category: 'Ventas', published: false, featured: false },
-    ];
-
-    const initialNewsData = [
-      { id: 'news1', title: 'Lanzamiento de Gestor de Proyectos TSC v2.5', date: '2025-05-15', category: 'Lanzamientos', published: true },
-      { id: 'news2', title: 'TSC Innovation reconocida por su excelencia en IA', date: '2025-05-10', category: 'Premios', published: true },
-    ];
     
-    const initialSupportTickets = [
-      { id: 'ticket1', user: 'Juan Pérez', app: 'Gestor de Proyectos TSC', subject: 'Error al exportar reporte', priority: 'Alta', status: 'Abierto', assignedTo: 'Ana Gómez', date: '2025-05-20' },
-      { id: 'ticket2', user: 'Maria López', app: 'Analizador de Datos IA', subject: 'No carga dataset grande', priority: 'Media', status: 'En Progreso', assignedTo: 'Carlos Ruiz', date: '2025-05-19' },
-      { id: 'ticket3', user: 'Pedro Ramirez', app: 'CRM TSC Conecta', subject: 'Sugerencia: Nueva integración', priority: 'Baja', status: 'Cerrado', assignedTo: 'Ana Gómez', date: '2025-05-18' },
-    ];
 
     const AdminDashboard = () => {
+      const { currentUser } = useAuth();
+      if (!currentUser || currentUser.email !== "admin@tsc.com") {
+        return <div>No autorizado</div>;
+      }
       const { toast } = useToast();
       const [activeTab, setActiveTab] = useState("apps");
       const [apps, setApps] = useState([]);
@@ -51,74 +46,64 @@
       const [currentNewsItem, setCurrentNewsItem] = useState(null);
 
       useEffect(() => {
-        // Load data from localStorage or use initial mock data
-        const storedApps = JSON.parse(localStorage.getItem('adminApps')) || initialAppsData;
-        const storedNews = JSON.parse(localStorage.getItem('adminNews')) || initialNewsData;
-        const storedTickets = JSON.parse(localStorage.getItem('supportTickets')) || initialSupportTickets; // Use supportTickets from localStorage
-        setApps(storedApps);
-        setNews(storedNews);
-        setTickets(storedTickets);
+        fetchCatalog().then(setApps);
+        fetchNews().then(setNews);
+        fetchTickets().then(setTickets);
       }, []);
-
-      // Save to localStorage whenever apps or news change
-      useEffect(() => {
-        localStorage.setItem('adminApps', JSON.stringify(apps));
-      }, [apps]);
-
-      useEffect(() => {
-        localStorage.setItem('adminNews', JSON.stringify(news));
-      }, [news]);
-      
-      // Support tickets are managed by SupportPage for submission, AdminDashboard for viewing/management
-      // This effect ensures AdminDashboard reflects changes made by SupportPage if it also writes to localStorage
-      useEffect(() => {
-        const handleStorageChange = () => {
-          const updatedTickets = JSON.parse(localStorage.getItem('supportTickets')) || initialSupportTickets;
-          setTickets(updatedTickets);
-        };
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-      }, []);
-
 
       const handleAppFormSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const appData = Object.fromEntries(formData.entries());
-        appData.published = appData.published === 'on';
-        appData.featured = appData.featured === 'on';
-        appData.id = currentApp ? currentApp.id : `app${Date.now()}`;
-        appData.lastUpdate = new Date().toISOString().split('T')[0];
 
-        if (currentApp) {
-          setApps(apps.map(app => app.id === currentApp.id ? appData : app));
-          toast({ title: "Aplicación Actualizada", description: `${appData.name} ha sido actualizada.` });
-        } else {
-          setApps([...apps, appData]);
-          toast({ title: "Aplicación Añadida", description: `${appData.name} ha sido añadida.` });
-        }
-        setIsAppDialogOpen(false);
-        setCurrentApp(null);
+        appData.published   = appData.published === 'on';
+        appData.featured    = appData.featured === 'on';
+        appData.id          = currentApp ? currentApp.id : `app${Date.now()}`;
+        appData.lastUpdate  = new Date().toISOString().split('T')[0];
+
+        saveApp(appData).then(() => {
+          fetchCatalog().then(setApps); // recarga desde backend
+          toast({
+            title: currentApp ? "Aplicación Actualizada" : "Aplicación Añadida",
+            description: `${appData.name} ha sido ${currentApp ? "actualizada" : "añadida"}.`
+          });
+          setIsAppDialogOpen(false);
+          setCurrentApp(null);
+        }).catch(() => {
+          toast({
+            title: "Error",
+            description: "No se pudo guardar la aplicación.",
+            variant: "destructive"
+          });
+        });
       };
-      
+
       const handleNewsFormSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const newsData = Object.fromEntries(formData.entries());
-        newsData.published = newsData.published === 'on';
-        newsData.id = currentNewsItem ? currentNewsItem.id : `news${Date.now()}`;
-        newsData.date = newsData.date || new Date().toISOString().split('T')[0];
 
-        if (currentNewsItem) {
-          setNews(news.map(item => item.id === currentNewsItem.id ? newsData : item));
-          toast({ title: "Noticia Actualizada", description: `La noticia "${newsData.title}" ha sido actualizada.` });
-        } else {
-          setNews([...news, newsData]);
-          toast({ title: "Noticia Añadida", description: `La noticia "${newsData.title}" ha sido añadida.` });
-        }
-        setIsNewsDialogOpen(false);
-        setCurrentNewsItem(null);
+        newsData.published = newsData.published === 'on';
+        newsData.id        = currentNewsItem ? currentNewsItem.id : `news${Date.now()}`;
+        newsData.date      = newsData.date || new Date().toISOString().split('T')[0];
+
+        saveNews(newsData).then(() => {
+          fetchNews().then(setNews);
+          toast({
+            title: currentNewsItem ? "Noticia Actualizada" : "Noticia Añadida",
+            description: `La noticia "${newsData.title}" ha sido ${currentNewsItem ? "actualizada" : "añadida"}.`
+          });
+          setIsNewsDialogOpen(false);
+          setCurrentNewsItem(null);
+        }).catch(() => {
+          toast({
+            title: "Error",
+            description: "No se pudo guardar la noticia.",
+            variant: "destructive"
+          });
+        });
       };
+
 
       const openAppDialog = (app = null) => {
         setCurrentApp(app);
@@ -131,13 +116,17 @@
       };
 
       const deleteApp = (appId) => {
-        setApps(apps.filter(app => app.id !== appId));
-        toast({ title: "Aplicación Eliminada", variant: "destructive" });
+        delApp(appId).then(() => {
+          fetchCatalog().then(setApps);
+          toast({ title: "Aplicación eliminada", variant: "destructive" });
+        });
       };
       
       const deleteNews = (newsId) => {
-        setNews(news.filter(item => item.id !== newsId));
-        toast({ title: "Noticia Eliminada", variant: "destructive" });
+        delNews(newsId).then(() => {
+          fetchNews().then(setNews);
+          toast({ title: "Noticia eliminada", variant: "destructive" });
+        });
       };
 
       const AppForm = ({ app, onSubmit, onCancel }) => (
@@ -212,7 +201,6 @@
             t.id === ticket.id ? { ...t, assignedTo, status } : t
           );
           setTickets(updatedTickets);
-          localStorage.setItem('supportTickets', JSON.stringify(updatedTickets));
           toast({ title: "Ticket Actualizado", description: `El ticket ${ticket.id} ha sido actualizado.` });
         };
         
